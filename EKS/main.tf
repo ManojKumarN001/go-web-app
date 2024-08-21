@@ -5,18 +5,7 @@ terraform {
       version = "~> 5.0"
     }
   }
-}
-
-# Configure the AWS Provider
-provider "aws" {
-  region = var.region
-}
-
-
-########################### TF workspace ######################################################
-
-
-terraform {
+  
   cloud {
     organization = "Terraform_Infra_Automation"
     workspaces {
@@ -25,7 +14,12 @@ terraform {
   }
 }
 
+# Configure the AWS Provider
+provider "aws" {
+  region = var.region
+}
 
+# Retrieve remote state from VPC workspace
 data "terraform_remote_state" "vpc" {
   backend = "remote"
   config = {
@@ -36,63 +30,78 @@ data "terraform_remote_state" "vpc" {
   }
 }
 
-
+# Create EKS Cluster
 resource "aws_eks_cluster" "eks" {
   name     = var.names
   role_arn = aws_iam_role.master.arn
-
+  version  = "1.27"  # Specify the desired Kubernetes version
 
   vpc_config {
-  subnet_ids = [data.terraform_remote_state.vpc.outputs.subnets_id, data.terraform_remote_state.vpc.outputs.subnet_ids]
-}
+    subnet_ids = concat(
+      data.terraform_remote_state.vpc.outputs.subnets_id, 
+      data.terraform_remote_state.vpc.outputs.subnet_ids
+    )
+  }
 
   depends_on = [
     aws_iam_role_policy_attachment.AmazonEKSClusterPolicy,
     aws_iam_role_policy_attachment.AmazonEKSServicePolicy,
     aws_iam_role_policy_attachment.AmazonEKSVPCResourceController,
-    aws_iam_role_policy_attachment.AmazonEKSVPCResourceController,
-    #aws_subnet.pub_sub1,
-    #aws_subnet.pub_sub2,
   ]
-
 }
 
+# Add-ons for EKS Cluster
+resource "aws_eks_addon" "coredns" {
+  cluster_name = aws_eks_cluster.eks.name
+  addon_name   = "coredns"
+  addon_version = "v1.10.1-eksbuild.1" # Optional: Specify a version or use latest
+  resolve_conflicts = "OVERWRITE"
+}
 
+resource "aws_eks_addon" "kube-proxy" {
+  cluster_name = aws_eks_cluster.eks.name
+  addon_name   = "kube-proxy"
+  addon_version = "v1.27.0-eksbuild.1" # Optional: Specify a version or use latest
+  resolve_conflicts = "OVERWRITE"
+}
 
+resource "aws_eks_addon" "vpc-cni" {
+  cluster_name = aws_eks_cluster.eks.name
+  addon_name   = "vpc-cni"
+  addon_version = "v1.13.1-eksbuild.1" # Optional: Specify a version or use latest
+  resolve_conflicts = "OVERWRITE"
+}
 
-
-
-
-################################################## EKS-Nodes-group ##############################################
-
-
-
+# EC2 Instance for kubectl access
 resource "aws_instance" "kubectl-server" {
   ami                         = var.custome_ami_ids
   key_name                    = var.ec2_ssh_keys
   instance_type               = var.instance_types
   associate_public_ip_address = true
-  subnet_id                   = data.terraform_remote_state.vpc.outputs.subnets_id
-  vpc_security_group_ids      = [data.terraform_remote_state.vpc.outputs.security_groups]
+  subnet_id                   = data.terraform_remote_state.vpc.outputs.subnets_id[0]
+  vpc_security_group_ids      = data.terraform_remote_state.vpc.outputs.security_groups
 
   tags = {
     Name = var.Name2
   }
-
 }
 
+# EKS Node Group
 resource "aws_eks_node_group" "node-grp" {
   cluster_name    = aws_eks_cluster.eks.name
   node_group_name = var.node_group_names
   node_role_arn   = aws_iam_role.worker.arn
-  subnet_ids      = [data.terraform_remote_state.vpc.outputs.subnets_id, data.terraform_remote_state.vpc.outputs.subnet_ids]
+  subnet_ids      = concat(
+    data.terraform_remote_state.vpc.outputs.subnets_id, 
+    data.terraform_remote_state.vpc.outputs.subnet_ids
+  )
   capacity_type   = var.capacity_types
   disk_size       = var.disk_sizes
   instance_types  = [var.instance_types]
 
   remote_access {
     ec2_ssh_key               = var.ec2_ssh_keys
-    source_security_group_ids = [data.terraform_remote_state.vpc.outputs.security_groups]
+    source_security_group_ids = data.terraform_remote_state.vpc.outputs.security_groups
   }
 
   labels = tomap({ env = "dev" })
@@ -111,24 +120,10 @@ resource "aws_eks_node_group" "node-grp" {
     aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
-    #aws_subnet.pub_sub1,
-    #aws_subnet.pub_sub2,
   ]
 }
 
-
-
-
-
-
-
-
-
-
-
-###################################################### IAM roles for EKS & node ################################################
-
-
+# IAM Role for EKS Master
 resource "aws_iam_role" "master" {
   name = "ed-eks-master"
 
@@ -148,6 +143,7 @@ resource "aws_iam_role" "master" {
 POLICY
 }
 
+# IAM Role Policy Attachments for EKS Master
 resource "aws_iam_role_policy_attachment" "AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.master.name
@@ -163,6 +159,7 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSVPCResourceController" {
   role       = aws_iam_role.master.name
 }
 
+# IAM Role for EKS Worker Nodes
 resource "aws_iam_role" "worker" {
   name = "ed-eks-worker"
 
@@ -182,6 +179,7 @@ resource "aws_iam_role" "worker" {
 POLICY
 }
 
+# IAM Policy for Auto Scaling
 resource "aws_iam_policy" "autoscaler" {
   name   = "ed-eks-autoscaler-policy"
   policy = <<EOF
@@ -204,9 +202,9 @@ resource "aws_iam_policy" "autoscaler" {
   ]
 }
 EOF
-
 }
 
+# IAM Role Policy Attachments for EKS Worker Nodes
 resource "aws_iam_role_policy_attachment" "AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
   role       = aws_iam_role.worker.name
@@ -231,6 +229,7 @@ resource "aws_iam_role_policy_attachment" "x-ray" {
   policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
   role       = aws_iam_role.worker.name
 }
+
 resource "aws_iam_role_policy_attachment" "s3" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
   role       = aws_iam_role.worker.name
@@ -241,10 +240,9 @@ resource "aws_iam_role_policy_attachment" "autoscaler" {
   role       = aws_iam_role.worker.name
 }
 
+# IAM Instance Profile for Worker Nodes
 resource "aws_iam_instance_profile" "worker" {
   depends_on = [aws_iam_role.worker]
   name       = "ed-eks-worker-new-profile"
   role       = aws_iam_role.worker.name
-
 }
-
