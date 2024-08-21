@@ -68,7 +68,7 @@ resource "aws_eks_addon" "kube-proxy" {
 resource "aws_eks_addon" "vpc-cni" {
   cluster_name = aws_eks_cluster.eks.name
   addon_name   = "vpc-cni"
-  addon_version = "v1.13.1-eksbuild.1" # Optional: Specify a version or use latest
+  addon_version = "v1.15.1-eksbuild.1" # Optional: Specify a version or use latest
   resolve_conflicts = "OVERWRITE"
 }
 
@@ -245,4 +245,46 @@ resource "aws_iam_instance_profile" "worker" {
   depends_on = [aws_iam_role.worker]
   name       = "ed-eks-worker-new-profile"
   role       = aws_iam_role.worker.name
+}
+
+
+#### EKS role ampping ####
+
+
+
+provider "kubernetes" {
+  host                   = aws_eks_cluster.eks.endpoint
+  cluster_ca_certificate = base64decode(aws_eks_cluster.eks.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.cluster.token
+}
+
+data "aws_eks_cluster_auth" "cluster" {
+  name = aws_eks_cluster.eks.name
+}
+
+resource "kubernetes_config_map" "aws_auth" {
+  metadata {
+    name      = "aws-auth"
+    namespace = "kube-system"
+  }
+
+  data = {
+#     mapRoles = <<YAML
+# - rolearn: arn:aws:iam::779310281675:user/terraform-test_user
+#   username: system:node:{{EC2PrivateDNSName}}
+#   groups:
+#     - system:bootstrappers
+#     - system:nodes
+# - rolearn: arn:aws:iam::779310281675:user/terraform-test_user
+#   username: ops-role
+#   groups:
+#     - system:masters
+# YAML
+    mapUsers = <<YAML
+- userarn: arn:aws:iam::779310281675:user/terraform-test_user
+  username: developer-user
+  groups:
+    - system:masters
+YAML
+  }
 }
