@@ -54,10 +54,9 @@ resource "aws_subnet" "pub_sub-1" {
 }
 
 
-resource "aws_subnet" "pub_sub-2" {
+resource "aws_subnet" "prv_sub-2" {
   vpc_id                  = aws_vpc.TF_vpc.id
   cidr_block              = "10.0.2.0/24"
-  map_public_ip_on_launch = true
   availability_zone       = var.availability_zone-2
 
   tags = {
@@ -148,7 +147,7 @@ resource "aws_route_table" "TF_public_RT" {
 ########################################### Route table association #########################################################
 
 resource "aws_route_table_association" "TF_RT_association" {
-  subnet_id      = aws_subnet.pub_sub-1.id
+  subnet_id      = aws_subnet.pub_sub-1.id 
   route_table_id = aws_route_table.TF_public_RT.id
 
 }
@@ -202,7 +201,7 @@ resource "aws_route_table_association" "TF_NAT_RT_Association" {
   depends_on = [
     aws_route_table.TF_routeTable-2
   ]
-  subnet_id = aws_subnet.pub_sub-2.id
+  subnet_id = aws_subnet.pub_sub-1.id
   # subnet_id      = data.terraform_remote_state.SG.outputs.subnet_id ### calling this from security group workspace ##########
   route_table_id = aws_route_table.TF_routeTable-2.id
 }

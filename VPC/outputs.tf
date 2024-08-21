@@ -2,12 +2,12 @@ output "vpc_id" {
   value = aws_vpc.TF_vpc.id
 }
 
-output "subnets_id" {
-  value = aws_subnet.pub_sub-1.id
+output "pub_subnet_id" {
+  value = aws_subnet.pub_sub-1
 }
 
-output "subnet_ids" {
-  value = aws_subnet.pub_sub-2.id
+output "prv_subnet_id" {
+  value = aws_subnet.prv_sub-2
 }
 
 
