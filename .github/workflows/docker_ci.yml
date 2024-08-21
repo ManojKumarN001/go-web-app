@@ -28,7 +28,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/go-web-app:${{github.run_id}}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/go-web-app:v1
 
       - name: Logout from DockerHub
         run: docker logout
