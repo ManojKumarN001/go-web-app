@@ -58,19 +58,19 @@ resource "aws_eks_addon" "coredns" {
   resolve_conflicts = "OVERWRITE"
 }
 
-resource "aws_eks_addon" "kube-proxy" {
-  cluster_name = aws_eks_cluster.eks.name
-  addon_name   = "kube-proxy"
-  addon_version = "v1.27.0-eksbuild.1" # Optional: Specify a version or use latest
-  resolve_conflicts = "OVERWRITE"
-}
+# resource "aws_eks_addon" "kube-proxy" {
+#   cluster_name = aws_eks_cluster.eks.name
+#   addon_name   = "kube-proxy"
+#   addon_version = "v1.27.0-eksbuild.1" # Optional: Specify a version or use latest
+#   resolve_conflicts = "OVERWRITE"
+# }
 
-resource "aws_eks_addon" "vpc-cni" {
-  cluster_name = aws_eks_cluster.eks.name
-  addon_name   = "vpc-cni"
-  addon_version = "v1.15.1-eksbuild.1" # Optional: Specify a version or use latest
-  resolve_conflicts = "OVERWRITE"
-}
+# resource "aws_eks_addon" "vpc-cni" {
+#   cluster_name = aws_eks_cluster.eks.name
+#   addon_name   = "vpc-cni"
+#   addon_version = "v1.15.1-eksbuild.1" # Optional: Specify a version or use latest
+#   resolve_conflicts = "OVERWRITE"
+# }
 
 # EC2 Instance for kubectl access
 resource "aws_instance" "kubectl-server" {
@@ -78,7 +78,7 @@ resource "aws_instance" "kubectl-server" {
   key_name                    = var.ec2_ssh_keys
   instance_type               = var.instance_types
   associate_public_ip_address = true
-  subnet_id                   = "subnet-096f88a59f6c8014a"
+  subnet_id                   = "subnet-046329a9babe73e9a"
   vpc_security_group_ids      = ["sg-0eb11136b1d24ad0b"]
 
   tags = {
