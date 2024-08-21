@@ -38,8 +38,8 @@ resource "aws_eks_cluster" "eks" {
 
   vpc_config {
     subnet_ids = concat(
-      data.terraform_remote_state.vpc.outputs.subnets_id, 
-      data.terraform_remote_state.vpc.outputs.subnet_ids
+      data.terraform_remote_state.vpc.outputs.subnets_id.id, 
+      data.terraform_remote_state.vpc.outputs.subnet_ids.id
     )
   }
 
@@ -78,8 +78,8 @@ resource "aws_instance" "kubectl-server" {
   key_name                    = var.ec2_ssh_keys
   instance_type               = var.instance_types
   associate_public_ip_address = true
-  subnet_id                   = data.terraform_remote_state.vpc.outputs.subnets_id[0]
-  vpc_security_group_ids      = data.terraform_remote_state.vpc.outputs.security_groups
+  subnet_id                   = data.terraform_remote_state.vpc.outputs.subnets_id.id
+  vpc_security_group_ids      = data.terraform_remote_state.vpc.outputs.security_groups.id
 
   tags = {
     Name = var.Name2
