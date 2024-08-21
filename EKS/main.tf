@@ -38,8 +38,8 @@ resource "aws_eks_cluster" "eks" {
 
   vpc_config {
     subnet_ids = concat([
-      data.terraform_remote_state.vpc.outputs.pub_subnet_id, 
-      data.terraform_remote_state.vpc.outputs.prv_subnet_id
+      "subnet-046329a9babe73e9a", 
+      "subnet-096f88a59f6c8014a"
     ])
   }
 
@@ -78,8 +78,8 @@ resource "aws_instance" "kubectl-server" {
   key_name                    = var.ec2_ssh_keys
   instance_type               = var.instance_types
   associate_public_ip_address = true
-  subnet_id                   = [data.terraform_remote_state.vpc.outputs.pub_subnet_id]
-  vpc_security_group_ids      = data.terraform_remote_state.vpc.outputs.security_groups
+  subnet_id                   = "subnet-096f88a59f6c8014a"
+  vpc_security_group_ids      = ["sg-0eb11136b1d24ad0b"]
 
   tags = {
     Name = var.Name2
@@ -92,8 +92,8 @@ resource "aws_eks_node_group" "node-grp" {
   node_group_name = var.node_group_names
   node_role_arn   = aws_iam_role.worker.arn
   subnet_ids      = concat(
-    data.terraform_remote_state.vpc.outputs.subnets_id, 
-    data.terraform_remote_state.vpc.outputs.subnet_ids
+    ["subnet-046329a9babe73e9a"],  # single-item list
+    ["subnet-096f88a59f6c8014a"]
   )
   capacity_type   = var.capacity_types
   disk_size       = var.disk_sizes
@@ -101,7 +101,7 @@ resource "aws_eks_node_group" "node-grp" {
 
   remote_access {
     ec2_ssh_key               = var.ec2_ssh_keys
-    source_security_group_ids = data.terraform_remote_state.vpc.outputs.security_groups
+    source_security_group_ids = [data.terraform_remote_state.vpc.outputs.security_groups]
   }
 
   labels = tomap({ env = "dev" })
