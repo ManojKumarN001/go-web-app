@@ -60,7 +60,7 @@ resource "aws_subnet" "prv_sub-2" {
   availability_zone       = var.availability_zone-2
 
   tags = {
-    Name        = "public_sub-2"
+    Name        = "private_sub-2"
     Environment = var.Environment
   }
 }
@@ -201,7 +201,7 @@ resource "aws_route_table_association" "TF_NAT_RT_Association" {
   depends_on = [
     aws_route_table.TF_routeTable-2
   ]
-  subnet_id = aws_subnet.pub_sub-1.id
+  subnet_id = aws_subnet.prv_sub-2.id
   # subnet_id      = data.terraform_remote_state.SG.outputs.subnet_id ### calling this from security group workspace ##########
   route_table_id = aws_route_table.TF_routeTable-2.id
 }
