@@ -37,10 +37,10 @@ resource "aws_eks_cluster" "eks" {
   version  = "1.27"  # Specify the desired Kubernetes version
 
   vpc_config {
-    subnet_ids = concat(
-      data.terraform_remote_state.vpc.outputs.subnets_id.id, 
-      data.terraform_remote_state.vpc.outputs.subnet_ids.id
-    )
+    subnet_ids = concat([
+      data.terraform_remote_state.vpc.outputs.pub_subnet_id, 
+      data.terraform_remote_state.vpc.outputs.prv_subnet_id
+    ])
   }
 
   depends_on = [
@@ -78,8 +78,8 @@ resource "aws_instance" "kubectl-server" {
   key_name                    = var.ec2_ssh_keys
   instance_type               = var.instance_types
   associate_public_ip_address = true
-  subnet_id                   = data.terraform_remote_state.vpc.outputs.subnets_id.id
-  vpc_security_group_ids      = data.terraform_remote_state.vpc.outputs.security_groups.id
+  subnet_id                   = [data.terraform_remote_state.vpc.outputs.pub_subnet_id]
+  vpc_security_group_ids      = data.terraform_remote_state.vpc.outputs.security_groups
 
   tags = {
     Name = var.Name2
