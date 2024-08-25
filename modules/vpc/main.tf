@@ -88,7 +88,7 @@ resource "aws_route_table" "private" {
 data "aws_route_tables" "private" {
   filter {
     name   = "vpc-id"
-    values = [aws_vpc.main.id]
+    values = [aws_vpc.this.id]
   }
 }
 
