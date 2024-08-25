@@ -43,7 +43,7 @@ module "eks" {
     "Project"     = "eks-project"
   }
   name_prefix              = "my-project"
-  instance_types           = ["t2.micro"]
+  instance_types           = ["m5.large"]
   cluster_version          = "1.28"
   desired_capacity         = 2
   max_size                 = 3
