@@ -7,7 +7,7 @@ resource "aws_eks_cluster" "this" {
   role_arn = aws_iam_role.eks_cluster.arn
 
   vpc_config {
-    subnet_ids = var.subnet_ids
+    subnet_ids              = var.subnet_ids
     endpoint_private_access = var.endpoint_private_access
     endpoint_public_access  = var.endpoint_public_access
     security_group_ids      = [aws_security_group.control_plane.id]
@@ -56,7 +56,7 @@ resource "aws_iam_role_policy_attachment" "eks_node_group" {
 }
 
 resource "aws_security_group" "control_plane" {
-  name        = "control-plane-sg"
+  name        = "${var.cluster_name}-control-plane-sg"
   description = "Security group for EKS control plane"
   vpc_id      = var.vpc_id
 
@@ -64,7 +64,7 @@ resource "aws_security_group" "control_plane" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.cluster_security_group_ingress_cidrs
   }
 
   egress {
@@ -73,6 +73,7 @@ resource "aws_security_group" "control_plane" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
   tags = merge(var.tags, { "Name" = "${var.name_prefix}/ControlPlaneSecurityGroup" })
 }
 
@@ -87,23 +88,24 @@ data "aws_iam_policy_document" "eks_assume_role_policy" {
   }
 }
 
+# Uncomment if needed
 # resource "aws_eks_addon" "coredns" {
-#   cluster_name = aws_eks_cluster.this.name
-#   addon_name   = "coredns"
-#   addon_version = var.coredns_version
+#   cluster_name    = aws_eks_cluster.this.name
+#   addon_name      = "coredns"
+#   addon_version   = var.coredns_version
 #   resolve_conflicts = "OVERWRITE"
 # }
 
 resource "aws_eks_addon" "kube_proxy" {
-  cluster_name = aws_eks_cluster.this.name
-  addon_name   = "kube-proxy"
-  addon_version = var.kube_proxy_version
+  cluster_name    = aws_eks_cluster.this.name
+  addon_name      = "kube-proxy"
+  addon_version   = var.kube_proxy_version
   resolve_conflicts = "OVERWRITE"
 }
 
 resource "aws_eks_addon" "vpc_cni" {
-  cluster_name = aws_eks_cluster.this.name
-  addon_name   = "vpc-cni"
-  addon_version = var.vpc_cni_version
+  cluster_name    = aws_eks_cluster.this.name
+  addon_name      = "vpc-cni"
+  addon_version   = var.vpc_cni_version
   resolve_conflicts = "OVERWRITE"
 }
