@@ -58,7 +58,7 @@ module "eks" {
   }
   vpc_id                   = module.vpc.vpc_id
   cluster_security_group_ingress_cidrs = ["0.0.0.0/0"]
-  coredns_version         = "v1.11.1-eksbuild.11"
+  # coredns_version         = "v1.11.1-eksbuild.11"
   kube_proxy_version      = "v1.30.0-eksbuild.3"
   vpc_cni_version         = "v1.18.3-eksbuild.2"
 }
