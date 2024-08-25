@@ -8,7 +8,7 @@ image:
   repository: mpeace001/go-web-app
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "10485056305"
+  tag: "10547284639"
 
 ingress:
   enabled: false
