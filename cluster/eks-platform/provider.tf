@@ -9,15 +9,15 @@ terraform {
 
 # Configure the AWS Provider
 
-########################### TF workspace ######################################################
+#------------------- Terrform cloud backend ----------------------------#
 
 
-# terraform {
-#   cloud {
-#     organization = "Terraform_Infra_Automation"
-#     workspaces {
-#       name = "Kubernetes-Cluster-workspace"
-#     }
-#   }
-# }
+terraform {
+  cloud {
+    organization = "Terraform_Infra_Automation"
+    workspaces {
+      name = "Kubernetes-Cluster-workspace"
+    }
+  }
+}
 
