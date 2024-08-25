@@ -56,17 +56,23 @@ resource "aws_iam_role_policy_attachment" "eks_node_group" {
 }
 
 resource "aws_security_group" "control_plane" {
-  name        = "${var.cluster_name}-control-plane-sg"
-  description = "Control plane security group for EKS cluster"
+  name        = "control-plane-sg"
+  description = "Security group for EKS control plane"
   vpc_id      = var.vpc_id
 
   ingress {
     from_port   = 0
-    to_port     = 0
+    to_port     = 65535
     protocol    = "-1"
-    cidr_blocks = var.cluster_security_group_ingress_cidrs
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   tags = merge(var.tags, { "Name" = "${var.name_prefix}/ControlPlaneSecurityGroup" })
 }
 
