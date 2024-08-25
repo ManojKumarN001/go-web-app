@@ -17,7 +17,7 @@ resource "aws_subnet" "public" {
   availability_zone       = element(var.availability_zones, count.index)
   map_public_ip_on_launch = true
   tags                    = merge(var.tags, {
-    "Name" = "${var.name_prefix}/SubnetPublic${element(var.availability_zones, count.index)}"
+    "Name" = "${var.name_prefix}/SubnetPublic${element(var.availability_zones, count.index)}",
     "kubernetes.io/role/elb" = "1"
   })
 }
@@ -28,7 +28,7 @@ resource "aws_subnet" "private" {
   cidr_block        = element(var.private_subnets, count.index)
   availability_zone = element(var.availability_zones, count.index)
   tags              = merge(var.tags, {
-    "Name" = "${var.name_prefix}/SubnetPrivate${element(var.availability_zones, count.index)}"
+    "Name" = "${var.name_prefix}/SubnetPrivate${element(var.availability_zones, count.index)}",
     "kubernetes.io/role/internal-elb" = "1"
   })
 }
@@ -61,61 +61,20 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_route_table" "private" {
-  count = length(var.availability_zones)  # Ensure that 'count' is used
-
+  count = length(var.private_subnets)
   vpc_id = aws_vpc.this.id
-
-  tags = merge(
-    var.tags, 
-    { 
-      "Name" = "${var.name_prefix}/PrivateRouteTable${element(var.availability_zones, count.index)}" 
-    }
-  )
-}
-
-
-# resource "aws_route" "private_nat_gateway" {
-#   count = length([
-#     for rt in aws_route_table.private : rt.id
-#     if length([for r in rt.route : r if r.cidr_block != "0.0.0.0/0"]) > 0
-#   ])
-
-#   route_table_id         = aws_route_table.private[count.index].id
-#   destination_cidr_block = "0.0.0.0/0"
-#   nat_gateway_id         = aws_nat_gateway.this[count.index].id
-# }
-
-data "aws_route_tables" "private" {
-  filter {
-    name   = "vpc-id"
-    values = [aws_vpc.this.id]
-  }
-}
-
-locals {
-  private_route_tables_with_routes = [
-    for rt in data.aws_route_tables.private.ids : rt
-    if length([
-      for r in aws_route_table.private[rt].route : r
-      if r.cidr_block != "0.0.0.0/0"
-    ]) > 0
-  ]
+  tags = merge(var.tags, { "Name" = "${var.name_prefix}/PrivateRouteTable${count.index}" })
 }
 
 resource "aws_route" "private_nat_gateway" {
-  count = length(local.private_route_tables_with_routes)
-
-  route_table_id         = local.private_route_tables_with_routes[count.index]
+  count = length(var.private_subnets)
+  route_table_id         = element(aws_route_table.private.*.id, count.index)
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.this[count.index].id
+  nat_gateway_id         = aws_nat_gateway.this.id
 }
 
 resource "aws_route_table_association" "private" {
   count          = length(var.private_subnets)
-  subnet_id      = aws_subnet.private[count.index].id
-  route_table_id = aws_route_table.private[count.index].id
+  subnet_id      = element(aws_subnet.private.*.id, count.index)
+  route_table_id = element(aws_route_table.private.*.id, count.index)
 }
-
-
-
-
