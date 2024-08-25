@@ -1,3 +1,5 @@
+#--------------------- Provider --------------------#
+
 provider "aws" {
   alias  = "use1"
   region = "us-east-1"
@@ -29,27 +31,29 @@ module "vpc" {
 module "eks" {
   source = "../../modules/eks"
 
-  region           = "us-east-1"
-  cluster_name     = "my-eks-cluster"
-  subnet_ids       = ["subnet-12345678", "subnet-87654321"]
-  instance_types   = ["t2.micro"]
-  cluster_version  = "1.28"
-  desired_capacity = 2
-  max_size         = 3
-  min_size         = 1
-  tags = {
-    "Environment" = "dev"
-  }
-  cluster_iam_policies = {
-    "AmazonEKSClusterPolicy"         = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-    "AmazonEKSServicePolicy"         = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+  region                   = "us-east-1"
+  name_prefix              = "my-project"
+  cluster_name             = "demo-cluster"
+  vpc_id                   = module.vpc.vpc_id
+  subnet_ids               = concat(module.vpc.public_subnet_ids, module.vpc.private_subnet_ids)
+  instance_types           = ["t2.micro"]
+  cluster_version          = "1.28"
+  desired_capacity         = 2
+  max_size                 = 3
+  min_size                 = 1
+  endpoint_private_access  = false
+  endpoint_public_access   = true
+  cluster_iam_policies     = {
+    "AmazonEKSClusterPolicy"    = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
     "AmazonEKSVPCResourceController" = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
   }
-  node_group_iam_policies = {
-    "AmazonEKSWorkerNodePolicy"          = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-    "AmazonEKS_CNI_Policy"               = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  node_group_iam_policies  = {
+    "AmazonEKSWorkerNodePolicy" = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
     "AmazonEC2ContainerRegistryReadOnly" = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   }
+  cluster_security_group_ingress_cidrs = ["0.0.0.0/0"]
+  tags                    = {
+    "Environment" = "dev"
+    "Project"     = "eks-project"
+  }
 }
-
-

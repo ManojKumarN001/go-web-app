@@ -8,9 +8,12 @@ resource "aws_eks_cluster" "this" {
 
   vpc_config {
     subnet_ids = var.subnet_ids
+    endpoint_private_access = var.endpoint_private_access
+    endpoint_public_access  = var.endpoint_public_access
+    security_group_ids      = [aws_security_group.control_plane.id]
   }
 
-  tags = var.tags
+  tags = merge(var.tags, { "Name" = "${var.name_prefix}/ControlPlane" })
 }
 
 resource "aws_eks_node_group" "this" {
@@ -20,14 +23,14 @@ resource "aws_eks_node_group" "this" {
   subnet_ids      = var.subnet_ids
   instance_types  = var.instance_types
   version         = var.cluster_version
-  
+
   scaling_config {
     desired_size = var.desired_capacity
     max_size     = var.max_size
     min_size     = var.min_size
   }
 
-  tags = var.tags
+  tags = merge(var.tags, { "Name" = "${var.name_prefix}/NodeGroup" })
 }
 
 resource "aws_iam_role" "eks_cluster" {
@@ -50,6 +53,20 @@ resource "aws_iam_role_policy_attachment" "eks_node_group" {
   for_each   = var.node_group_iam_policies
   role       = aws_iam_role.eks_node_group.name
   policy_arn = each.value
+}
+
+resource "aws_security_group" "control_plane" {
+  vpc_id = var.vpc_id
+  name   = "${var.cluster_name}-control-plane-sg"
+
+  ingress {
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "-1"
+    cidr_blocks = var.cluster_security_group_ingress_cidrs
+  }
+
+  tags = merge(var.tags, { "Name" = "${var.name_prefix}/ControlPlaneSecurityGroup" })
 }
 
 data "aws_iam_policy_document" "eks_assume_role_policy" {
