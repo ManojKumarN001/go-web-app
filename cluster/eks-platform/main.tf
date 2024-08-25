@@ -6,11 +6,35 @@ provider "aws" {
 } 
 
 
+#------------------------ terraform provider --------------#
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+
+#------------------- Terrform cloud backend -------------------#
+
+
+terraform {
+  cloud {
+    organization = "Terraform_Infra_Automation"
+    workspaces {
+      name = "Kubernetes-Cluster-workspace"
+    }
+  }
+}
+
 #----------------------- data sources ----------------------#
 
 data "aws_availability_zones" "available" {}
 
-#---------------------------- VPC ----------------------- #
+#---------------------------- VPC -------------------------- #
 
 
 module "vpc" {
@@ -57,3 +81,4 @@ module "eks" {
     "Project"     = "eks-project"
   }
 }
+
