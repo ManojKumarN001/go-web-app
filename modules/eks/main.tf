@@ -56,12 +56,13 @@ resource "aws_iam_role_policy_attachment" "eks_node_group" {
 }
 
 resource "aws_security_group" "control_plane" {
-  vpc_id = var.vpc_id
-  name   = "${var.cluster_name}-control-plane-sg"
+  name        = "${var.cluster_name}-control-plane-sg"
+  description = "Control plane security group for EKS cluster"
+  vpc_id      = var.vpc_id
 
   ingress {
     from_port   = 0
-    to_port     = 65535
+    to_port     = 0
     protocol    = "-1"
     cidr_blocks = var.cluster_security_group_ingress_cidrs
   }

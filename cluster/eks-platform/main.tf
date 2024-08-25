@@ -87,4 +87,3 @@ module "eks" {
   kube_proxy_version      = "v1.28.1-eksbuild.1"
   vpc_cni_version         = "v1.12.0-eksbuild.1"
 }
-
