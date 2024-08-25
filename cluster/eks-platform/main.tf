@@ -34,6 +34,7 @@ terraform {
 
 data "aws_availability_zones" "available" {}
 
+
 #---------------------------- VPC -------------------------- #
 
 
@@ -50,6 +51,8 @@ module "vpc" {
     "Project"     = "eks-project"
   }
 }
+
+#---------------------------- EKS -------------------------- #
 
 
 module "eks" {
@@ -80,5 +83,8 @@ module "eks" {
     "Environment" = "dev"
     "Project"     = "eks-project"
   }
+  coredns_version         = "v1.8.7-eksbuild.1"
+  kube_proxy_version      = "v1.28.1-eksbuild.1"
+  vpc_cni_version         = "v1.12.0-eksbuild.1"
 }
 

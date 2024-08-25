@@ -80,3 +80,16 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+
+variable "coredns_version" {
+  description = "mention the suported vesrion of coredns of eks"
+}
+
+variable "kube_proxy_version" {
+  description = "mention the suported vesrion od kube proxy of eks"
+}
+
+variable "vpc_cni_version" {
+   description = "mention the suported vesrion of vpc_cni of eks"
+}
