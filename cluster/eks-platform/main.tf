@@ -60,7 +60,7 @@ module "eks" {
 
   region                   = "us-east-1"
   cluster_name             = "demo-cluster"
-  subnet_ids               = ["subnet-12345678", "subnet-87654321"]
+  subnet_ids               = concat(module.vpc.public_subnet_ids, module.vpc.private_subnet_ids)
   endpoint_private_access  = false
   endpoint_public_access   = true
   tags                     = {
