@@ -82,9 +82,9 @@ variable "tags" {
 }
 
 
-variable "coredns_version" {
-  description = "mention the suported vesrion of coredns of eks"
-}
+# variable "coredns_version" {
+#   description = "mention the suported vesrion of coredns of eks"
+# }
 
 variable "kube_proxy_version" {
   description = "mention the suported vesrion od kube proxy of eks"
