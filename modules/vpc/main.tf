@@ -74,13 +74,38 @@ resource "aws_route_table" "private" {
 }
 
 
-resource "aws_route" "private_nat_gateway" {
-  count = length([
-    for rt in aws_route_table.private : rt.id
-    if length([for r in rt.route : r if r.cidr_block != "0.0.0.0/0"]) > 0
-  ])
+# resource "aws_route" "private_nat_gateway" {
+#   count = length([
+#     for rt in aws_route_table.private : rt.id
+#     if length([for r in rt.route : r if r.cidr_block != "0.0.0.0/0"]) > 0
+#   ])
 
-  route_table_id         = aws_route_table.private[count.index].id
+#   route_table_id         = aws_route_table.private[count.index].id
+#   destination_cidr_block = "0.0.0.0/0"
+#   nat_gateway_id         = aws_nat_gateway.this[count.index].id
+# }
+
+data "aws_route_tables" "private" {
+  filter {
+    name   = "vpc-id"
+    values = [aws_vpc.main.id]
+  }
+}
+
+locals {
+  private_route_tables_with_routes = [
+    for rt in data.aws_route_tables.private.ids : rt
+    if length([
+      for r in aws_route_table.private[rt].route : r
+      if r.cidr_block != "0.0.0.0/0"
+    ]) > 0
+  ]
+}
+
+resource "aws_route" "private_nat_gateway" {
+  count = length(local.private_route_tables_with_routes)
+
+  route_table_id         = local.private_route_tables_with_routes[count.index]
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id         = aws_nat_gateway.this[count.index].id
 }
