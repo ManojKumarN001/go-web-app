@@ -1,4 +1,4 @@
-#--------------------- Provider --------------------#
+#-------------------------- Provider --------------------#
 
 provider "aws" {
   alias  = "use1"
@@ -6,7 +6,7 @@ provider "aws" {
 } 
 
 
-#--------------- data sources ------------------#
+#----------------------- data sources ----------------------#
 
 data "aws_availability_zones" "available" {}
 
