@@ -75,10 +75,14 @@ resource "aws_route_table" "private" {
 
 
 resource "aws_route" "private_nat_gateway" {
-  count                = length(var.private_subnets)
-  route_table_id       = aws_route_table.private[count.index].id
+  count = length([
+    for rt in aws_route_table.private : rt.id
+    if length([for r in rt.route : r if r.cidr_block != "0.0.0.0/0"]) > 0
+  ])
+
+  route_table_id         = aws_route_table.private[count.index].id
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id       = aws_nat_gateway.this.id
+  nat_gateway_id         = aws_nat_gateway.this[count.index].id
 }
 
 resource "aws_route_table_association" "private" {

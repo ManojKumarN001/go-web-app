@@ -83,7 +83,7 @@ module "eks" {
     "Environment" = "dev"
     "Project"     = "eks-project"
   }
-  coredns_version         = "v1.8.7-eksbuild.1"
-  kube_proxy_version      = "v1.28.1-eksbuild.1"
-  vpc_cni_version         = "v1.12.0-eksbuild.1"
+  coredns_version         = "v1.11.1-eksbuild.11"
+  kube_proxy_version      = "v1.30.0-eksbuild.3"
+  vpc_cni_version         = "v1.18.3-eksbuild.2"
 }
