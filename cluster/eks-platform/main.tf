@@ -32,7 +32,6 @@ module "vpc" {
 
 module "eks" {
   source = "../../modules/eks"
-  depends_on = [ module.vpc ]
 
   region                   = "us-east-1"
   cluster_name             = "demo-cluster"
