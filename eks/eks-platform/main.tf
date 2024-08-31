@@ -7,7 +7,7 @@ module "eks" {
   source = "../../module"
 
   env                   = local.env
-  cluster-name          = "${local.org}-${local.env}-eks-cluster}"
+  cluster-name          = "${local.org}-${local.env}-eks-cluster"
   cidr-block            = "10.16.0.0/16"
   vpc-name              = "${local.org}-${local.env}-vpc"
   igw-name              = "${local.org}-${local.env}-IGW"
