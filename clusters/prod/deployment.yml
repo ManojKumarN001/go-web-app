@@ -18,6 +18,6 @@ spec:
     spec:
       containers:
       - name: go-web-app
-        image: mpeace001/go-web-app:10547517120
+        image: mpeace001/go-web-app:10547425070
         ports:
         - containerPort: 8080
