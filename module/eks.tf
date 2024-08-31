@@ -59,7 +59,7 @@ resource "aws_eks_node_group" "ondemand-node" {
   }
 
 
-  subnet_ids = [aws_subnet.private-subnet[0].id, aws_subnet.private-subnet[1].id, aws_subnet.private-subnet[2].id]
+  subnet_ids = [aws_subnet.private-subnet[0].id, aws_subnet.private-subnet[1].id]
 
   instance_types = var.ondemand_instance_types
   capacity_type  = "ON_DEMAND"
@@ -90,7 +90,7 @@ resource "aws_eks_node_group" "spot-node" {
   }
 
 
-  subnet_ids = [aws_subnet.private-subnet[0].id, aws_subnet.private-subnet[1].id, aws_subnet.private-subnet[2].id]
+  subnet_ids = [aws_subnet.private-subnet[0].id, aws_subnet.private-subnet[1].id]
 
   instance_types = var.spot_instance_types
   capacity_type  = "SPOT"
