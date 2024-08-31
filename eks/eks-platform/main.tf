@@ -7,7 +7,7 @@ module "eks" {
   source = "../../module"
 
   env                   = local.env
-  cluster-name          = "${local.org}-${local.env}-eks-cluster}"
+  cluster-name          = "${local.org}-${local.env}-eks-cluster"
   cidr-block            = "10.16.0.0/16"
   vpc-name              = "${local.org}-${local.env}-vpc"
   igw-name              = "${local.org}-${local.env}-IGW"
@@ -29,9 +29,9 @@ module "eks" {
   is_eks_nodegroup_role_enabled = true
   ondemand_instance_types       = ["t3a.medium"]
   spot_instance_types           = ["c5a.large", "c5a.xlarge", "m5a.large", "m5a.xlarge", "c5.large", "m5.large", "t3a.large", "t3a.xlarge", "t3a.medium"]
-  desired_capacity_on_demand    = "1"
+  desired_capacity_on_demand    = "2"
   min_capacity_on_demand        = "1"
-  max_capacity_on_demand        = "5"
+  max_capacity_on_demand        = "3"
   desired_capacity_spot         = "1"
   min_capacity_spot             = "1"
   max_capacity_spot             = "10"
@@ -58,3 +58,5 @@ module "eks" {
     }
   ]
 }
+
+
