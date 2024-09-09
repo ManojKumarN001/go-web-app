@@ -3,3 +3,4 @@ resources:
   - deployment.yml
   - service.yml
   - ingress.yml
+  - nginx-ingress.yaml
