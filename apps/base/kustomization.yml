@@ -1,6 +1,6 @@
-resources:
-  - namespace.yml
-  - deployment.yml
-  - service.yml
-  - ingress.yml
-  - nginx-ingress.yaml
+# resources:
+#   - namespace.yml
+#   - deployment.yml
+#   - service.yml
+#   - ingress.yml
+#   - nginx-ingress.yaml
