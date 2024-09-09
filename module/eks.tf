@@ -71,7 +71,7 @@ resource "aws_eks_node_group" "ondemand-node" {
     max_unavailable = 1
   }
   tags = {
-    "Name" = "${var.cluster-name}-ondemand-nodes"
+    Name = "${var.cluster-name}-ondemand-nodes"
   }
 
   depends_on = [aws_eks_cluster.eks]
@@ -99,7 +99,7 @@ resource "aws_eks_node_group" "spot-node" {
     max_unavailable = 1
   }
   tags = {
-    "Name" = "${var.cluster-name}-spot-nodes"
+    Name = "${var.cluster-name}-spot-nodes"
   }
   labels = {
     type      = "spot"
