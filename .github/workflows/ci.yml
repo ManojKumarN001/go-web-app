@@ -91,4 +91,5 @@ jobs:
 
     - name: Push Updated Helm Chart to Flux Repo
       run: |
+          cd platform_flux
           git push https://ManojKumarN001:${{ secrets.FLUX_REPO_TOKEN }}@github.com/ManojKumarN001/platform_flux.git main
