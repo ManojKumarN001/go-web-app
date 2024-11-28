@@ -4,6 +4,9 @@ name: CI/CD
 
 # Exclude the workflow to run on changes to the helm chart
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
